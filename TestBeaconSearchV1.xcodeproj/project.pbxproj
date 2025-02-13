@@ -12,6 +12,8 @@
 		9FC371241D5D4B550072E6C2 /* TestBeaconSearchV1App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FC371251D5D4B550072E6C2 /* TestBeaconSearchV1App.swift */; };
 		9FC371261D5D4B550072E6C2 /* FavoriteDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FC371271D5D4B550072E6C2 /* FavoriteDevice.swift */; };
 		9FC371281D5D4B550072E6C2 /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FC371291D5D4B550072E6C2 /* FavoritesView.swift */; };
+		9FD3CCAF2D5E46C00006D215 /* BatteryUsageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD3CCAE2D5E46C00006D215 /* BatteryUsageView.swift */; };
+		9FD3CCB12D5E46D00006D215 /* BatteryUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD3CCB02D5E46D00006D215 /* BatteryUsage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +42,8 @@
 		9FC371251D5D4B550072E6C2 /* TestBeaconSearchV1App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestBeaconSearchV1App.swift; sourceTree = "<group>"; };
 		9FC371271D5D4B550072E6C2 /* FavoriteDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteDevice.swift; sourceTree = "<group>"; };
 		9FC371291D5D4B550072E6C2 /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
+		9FD3CCAE2D5E46C00006D215 /* BatteryUsageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryUsageView.swift; sourceTree = "<group>"; };
+		9FD3CCB02D5E46D00006D215 /* BatteryUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryUsage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -85,6 +89,8 @@
 				9FC371251D5D4B550072E6C2 /* TestBeaconSearchV1App.swift */,
 				9FC371271D5D4B550072E6C2 /* FavoriteDevice.swift */,
 				9FC371291D5D4B550072E6C2 /* FavoritesView.swift */,
+				9FD3CCAE2D5E46C00006D215 /* BatteryUsageView.swift */,
+				9FD3CCB02D5E46D00006D215 /* BatteryUsage.swift */,
 			);
 			path = TestBeaconSearchV1;
 			sourceTree = "<group>";
@@ -226,7 +232,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				9FC371201D5D4B550072E6C2 /* ContentView.swift in Sources */,
+				9FD3CCB12D5E46D00006D215 /* BatteryUsage.swift in Sources */,
 				9FC371221D5D4B550072E6C2 /* BluetoothManager.swift in Sources */,
+				9FD3CCAF2D5E46C00006D215 /* BatteryUsageView.swift in Sources */,
 				9FC371241D5D4B550072E6C2 /* TestBeaconSearchV1App.swift in Sources */,
 				9FC371261D5D4B550072E6C2 /* FavoriteDevice.swift in Sources */,
 				9FC371281D5D4B550072E6C2 /* FavoritesView.swift in Sources */,

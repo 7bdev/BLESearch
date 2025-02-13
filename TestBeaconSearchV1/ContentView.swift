@@ -31,6 +31,17 @@ struct ContentView: View {
                     
                     Spacer()
                     
+                    // Clear list button (only shows while scanning)
+                    if bluetoothManager.isScanning {
+                        Button {
+                            bluetoothManager.discoveredPeripherals.removeAll()
+                        } label: {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
+                        .padding(.horizontal, 8)
+                    }
+                    
                     Button {
                         if bluetoothManager.isScanning {
                             bluetoothManager.stopScanning()
@@ -39,12 +50,12 @@ struct ContentView: View {
                         }
                     } label: {
                         HStack {
-                            Image(systemName: "antenna.radiowaves.left.and.right")
-                            Text(bluetoothManager.isScanning ? "Stop Scanning" : "Start Scanning")
+                            Image(systemName: bluetoothManager.isScanning ? "stop.circle.fill" : "play.circle.fill")
+                                .font(.title2)
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        .background(bluetoothManager.isScanning ? Color.green : Color.gray)
+                        .background(bluetoothManager.isScanning ? Color.red : Color.green)
                         .foregroundColor(.white)
                         .cornerRadius(20)
                         .shadow(radius: 2)
@@ -54,13 +65,23 @@ struct ContentView: View {
                 }
                 .padding()
                 
+                // Error message
+                if let error = bluetoothManager.error {
+                    Text(error)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.red.opacity(0.8))
+                        .cornerRadius(8)
+                        .padding(.horizontal)
+                }
+                
                 // Device list
                 List {
                     // Favorites section
                     Section(header: Text("Favorites")) {
                         ForEach(bluetoothManager.discoveredPeripherals.filter { bluetoothManager.isFavorite($0.peripheral) },
                                id: \.peripheral.identifier) { discovered in
-                            deviceRow(for: discovered)
+                            deviceRow(for: (peripheral: discovered.peripheral, rssi: discovered.rssi))
                         }
                     }
                     
@@ -68,7 +89,7 @@ struct ContentView: View {
                     Section(header: Text("Other Devices")) {
                         ForEach(bluetoothManager.discoveredPeripherals.filter { !bluetoothManager.isFavorite($0.peripheral) },
                                id: \.peripheral.identifier) { discovered in
-                            deviceRow(for: discovered)
+                            deviceRow(for: (peripheral: discovered.peripheral, rssi: discovered.rssi))
                         }
                     }
                 }
@@ -89,8 +110,25 @@ struct ContentView: View {
             }
             .navigationTitle("BLE Scanner")
             .toolbar {
-                NavigationLink(destination: FavoritesView(bluetoothManager: bluetoothManager)) {
-                    Image(systemName: "star.fill")
+                HStack {
+                    NavigationLink(destination: FavoritesView(bluetoothManager: bluetoothManager)) {
+                        Image(systemName: "star.fill")
+                    }
+                    
+                    NavigationLink(destination: BatteryUsageView()) {
+                        Image(systemName: "battery.100")
+                    }
+                }
+            }
+            .onAppear {
+                if bluetoothManager.state == .poweredOn && !bluetoothManager.wasManuallyStopped {
+                    bluetoothManager.startScanning()
+                }
+            }
+            .onChange(of: bluetoothManager.state) { newState in
+                if newState == .poweredOn {
+                    bluetoothManager.error = nil
+                    bluetoothManager.startScanning()
                 }
             }
         }
@@ -178,15 +216,34 @@ struct PeripheralRow: View {
             VStack(alignment: .leading) {
                 Text(peripheral.name ?? "Unknown Device")
                     .font(.headline)
-                Text(peripheral.identifier.uuidString)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                HStack {
+                    if isAppleDevice(peripheral) {
+                        Image(systemName: "apple.logo")
+                            .foregroundColor(.gray)
+                    }
+                    Text(peripheral.identifier.uuidString)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                if let discovered = bluetoothManager.discoveredPeripherals.first(where: { $0.peripheral == peripheral }),
+                   let systemId = discovered.systemId {
+                    Text("MAC: \(systemId)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
                 HStack {
                     Image(systemName: "antenna.radiowaves.left.and.right")
                     Text("\(rssi) dBm")
                     Text("•")
                     Image(systemName: "ruler")
                     Text(String(format: "%.1fm", bluetoothManager.calculateDistance(rssi: rssi)))
+                    if let favorite = bluetoothManager.favoriteDevices.first(where: { $0.id == peripheral.identifier.uuidString }),
+                       favorite.batteryLevel >= 0 {
+                        Text("•")
+                        Image(systemName: batteryIcon(level: favorite.batteryLevel))
+                        Text("\(favorite.batteryLevel)%")
+                            .foregroundColor(batteryColor(level: favorite.batteryLevel))
+                    }
                 }
                 .font(.caption)
                 .foregroundColor(signalColor)
@@ -219,6 +276,33 @@ struct PeripheralRow: View {
         default:      // Poor signal
             return .red
         }
+    }
+    
+    private func batteryIcon(level: Int) -> String {
+        switch level {
+        case 0...20: return "battery.0"
+        case 21...40: return "battery.25"
+        case 41...60: return "battery.50"
+        case 61...80: return "battery.75"
+        default: return "battery.100"
+        }
+    }
+    
+    private func batteryColor(level: Int) -> Color {
+        switch level {
+        case 0...20: return .red
+        case 21...40: return .orange
+        default: return .green
+        }
+    }
+    
+    private func isAppleDevice(_ peripheral: CBPeripheral) -> Bool {
+        // Check if the name starts with common Apple device prefixes
+        let appleDevicePrefixes = ["iPhone", "iPad", "iPod", "Watch", "MacBook", "iMac", "Mac"]
+        if let name = peripheral.name {
+            return appleDevicePrefixes.contains { name.starts(with: $0) }
+        }
+        return false
     }
 }
 
